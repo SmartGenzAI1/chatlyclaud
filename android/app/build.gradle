@@ -1,0 +1,17 @@
+android {
+    compileSdkVersion 33
+    
+    defaultConfig {
+        applicationId "com.chatly.app"
+        minSdkVersion 21
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0.0"
+        multiDexEnabled true
+    }
+}
+
+dependencies {
+    implementation 'com.google.firebase:firebase-messaging:23.1.2'
+    implementation 'androidx.multidex:multidex:2.0.1'
+}
