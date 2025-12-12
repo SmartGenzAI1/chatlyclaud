@@ -1,0 +1,58 @@
+# ============================================================================
+# FILE: .github/workflows/nightly-build.yml
+# PURPOSE: Nightly builds for testing
+# ============================================================================
+
+---
+name: Nightly Build
+
+on:
+  schedule:
+    # Run at 2 AM UTC every day
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  nightly:
+    name: Nightly Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+          cache: true
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      
+      - name: Create Firebase Config
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
+      
+      - name: Get Dependencies
+        run: flutter pub get
+      
+      - name: Build Debug APK
+        run: flutter build apk --debug
+      
+      - name: Rename APK
+        run: |
+          DATE=$(date +%Y%m%d)
+          mv build/app/outputs/flutter-apk/app-debug.apk \
+             build/app/outputs/flutter-apk/Chatly-nightly-$DATE.apk
+      
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-build-$(date +%Y%m%d)
+          path: build/app/outputs/flutter-apk/Chatly-nightly-*.apk
+          retention-days: 7
