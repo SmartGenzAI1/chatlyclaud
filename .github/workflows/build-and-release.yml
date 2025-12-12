@@ -1,283 +1,65 @@
-# ============================================================================
-# FILE: .github/workflows/build-and-release.yml
-# PURPOSE: Automated APK build and GitHub release on push/tag
-# AUTHOR: Chatly Development Team
-# ============================================================================
+// # ============================================================================
 
-name: Build and Release APK
+//
+# FILE: android/app/src/main/AndroidManifest.xml
+// # PURPOSE: Android app manifest with permissions
+// # ============================================================================
 
-on:
-  push:
-    branches:
-      - main
-      - develop
-    tags:
-      - 'v*.*.*'
-  pull_request:
-    branches:
-      - main
-  workflow_dispatch:  # Allows manual trigger
-
-env:
-  FLUTTER_VERSION: '3.16.0'
-  JAVA_VERSION: '11'
-
-jobs:
-  # ============================================
-  # JOB 1: Build APK
-  # ============================================
-  build:
-    name: Build APK
-    runs-on: ubuntu-latest
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     
-    steps:
-      # Step 1: Checkout code
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Full history for version info
-      
-      # Step 2: Setup Java
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: ${{ env.JAVA_VERSION }}
-          cache: 'gradle'
-      
-      # Step 3: Setup Flutter
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
-      
-      # Step 4: Verify Flutter installation
-      - name: Verify Flutter
-        run: |
-          flutter --version
-          flutter doctor -v
-      
-      # Step 5: Create google-services.json from secrets
-      - name: Create Firebase Config
-        run: |
-          echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
-      
-      # Step 6: Create environment file
-      - name: Create Environment File
-        run: |
-          cat > .env << EOF
-          UNSPLASH_API_KEY=${{ secrets.UNSPLASH_API_KEY }}
-          PERSPECTIVE_API_KEY=${{ secrets.PERSPECTIVE_API_KEY }}
-          REVENUECAT_API_KEY=${{ secrets.REVENUECAT_API_KEY }}
-          EOF
-      
-      # Step 7: Get Flutter dependencies
-      - name: Get Dependencies
-        run: flutter pub get
-      
-      # Step 8: Run code analysis
-      - name: Analyze Code
-        run: flutter analyze
-        continue-on-error: true  # Don't fail build on warnings
-      
-      # Step 9: Run tests
-      - name: Run Tests
-        run: flutter test
-        continue-on-error: true
-      
-      # Step 10: Build APK (Debug for non-release)
-      - name: Build Debug APK
-        if: "!startsWith(github.ref, 'refs/tags/v')"
-        run: |
-          flutter build apk --debug
-          mv build/app/outputs/flutter-apk/app-debug.apk build/app/outputs/flutter-apk/Chatly-debug.apk
-      
-      # Step 11: Build APK (Release for tags)
-      - name: Build Release APK
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          flutter build apk --release
-          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/Chatly-release.apk
-      
-      # Step 12: Build App Bundle (for Play Store)
-      - name: Build App Bundle
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: flutter build appbundle --release
-      
-      # Step 13: Get version info
-      - name: Get Version Info
-        id: version
-        run: |
-          VERSION=$(grep 'version:' pubspec.yaml | cut -d ' ' -f 2)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Version: $VERSION"
-      
-      # Step 14: Upload Debug APK artifact
-      - name: Upload Debug APK Artifact
-        if: "!startsWith(github.ref, 'refs/tags/v')"
-        uses: actions/upload-artifact@v4
-        with:
-          name: Chatly-debug-${{ github.sha }}
-          path: build/app/outputs/flutter-apk/Chatly-debug.apk
-          retention-days: 30
-      
-      # Step 15: Upload Release APK artifact
-      - name: Upload Release APK Artifact
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@v4
-        with:
-          name: Chatly-release-${{ steps.version.outputs.version }}
-          path: |
-            build/app/outputs/flutter-apk/Chatly-release.apk
-            build/app/outputs/bundle/release/app-release.aab
-          retention-days: 90
-      
-      # Step 16: Calculate APK size
-      - name: Calculate APK Size
-        run: |
-          if [ -f "build/app/outputs/flutter-apk/Chatly-release.apk" ]; then
-            SIZE=$(du -h build/app/outputs/flutter-apk/Chatly-release.apk | cut -f1)
-            echo "APK_SIZE=$SIZE" >> $GITHUB_ENV
-            echo "Release APK Size: $SIZE"
-          else
-            SIZE=$(du -h build/app/outputs/flutter-apk/Chatly-debug.apk | cut -f1)
-            echo "APK_SIZE=$SIZE" >> $GITHUB_ENV
-            echo "Debug APK Size: $SIZE"
-          fi
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      apk_size: ${{ env.APK_SIZE }}
-
-  # ============================================
-  # JOB 2: Create GitHub Release (only for tags)
-  # ============================================
-  release:
-    name: Create GitHub Release
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    
-    steps:
-      # Step 1: Checkout code
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-      
-      # Step 2: Download artifacts
-      - name: Download APK Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: Chatly-release-${{ needs.build.outputs.version }}
-          path: ./release
-      
-      # Step 3: Generate changelog
-      - name: Generate Changelog
-        id: changelog
-        run: |
-          PREVIOUS_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
-          if [ -z "$PREVIOUS_TAG" ]; then
-            CHANGELOG="Initial release"
-          else
-            CHANGELOG=$(git log $PREVIOUS_TAG..HEAD --pretty=format:"- %s" --no-merges)
-          fi
-          
-          # Save to file
-          echo "$CHANGELOG" > changelog.txt
-          
-          # Set output (escape newlines)
-          {
-            echo 'changelog<<EOF'
-            echo "$CHANGELOG"
-            echo EOF
-          } >> $GITHUB_OUTPUT
-      
-      # Step 4: Create Release Notes
-      - name: Create Release Notes
-        run: |
-          cat > release_notes.md << EOF
-          # Chatly v${{ needs.build.outputs.version }}
-          
-          ## 📱 Download
-          
-          Download the APK below and install on your Android device.
-          
-          **APK Size**: ${{ needs.build.outputs.apk_size }}
-          
-          ## 📋 Installation Instructions
-          
-          1. Download \`Chatly-release.apk\`
-          2. Enable "Install from Unknown Sources" in your Android settings
-          3. Open the downloaded APK file
-          4. Follow the installation prompts
-          5. Launch Chatly and create your account!
-          
-          ## ✨ What's New
-          
-          ${{ steps.changelog.outputs.changelog }}
-          
-          ## 🔒 Security
-          
-          - End-to-end encryption enabled
-          - Messages auto-delete after 7 days
-          - No personal data collected without consent
-          
-          ## 🐛 Known Issues
-          
-          Please report any bugs on our [GitHub Issues](https://github.com/${{ github.repository }}/issues) page.
-          
-          ## 📞 Support
-          
-          - Email: support@chatly.app
-          - Documentation: [docs.chatly.app](https://docs.chatly.app)
-          - GitHub: [github.com/${{ github.repository }}](https://github.com/${{ github.repository }})
-          
-          ---
-          
-          Built with ❤️ using Flutter & Firebase
-          EOF
-      
-      # Step 5: Create GitHub Release
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            release/Chatly-release.apk
-            release/app-release.aab
-          body_path: release_notes.md
-          draft: false
-          prerelease: false
-          generate_release_notes: false
-          token: ${{ secrets.GITHUB_TOKEN }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      # Step 6: Comment on related issues
-      - name: Comment on Issues
-        if: success()
-        run: |
-          echo "Release created successfully!"
-          # Add logic to comment on issues fixed in this release
-
-  # ============================================
-  # JOB 3: Notify (optional)
-  # ============================================
-  notify:
-    name: Send Notifications
-    needs: [build, release]
-    runs-on: ubuntu-latest
-    if: always() && startsWith(github.ref, 'refs/tags/v')
-    
-    steps:
-      - name: Notify Success
-        if: needs.release.result == 'success'
-        run: |
-          echo "✅ Release v${{ needs.build.outputs.version }} created successfully!"
-          # Add Discord/Slack/Email notification here if needed
-      
-      - name: Notify Failure
-        if: needs.release.result == 'failure'
-        run: |
-          echo "❌ Release failed!"
-          # Add Discord/Slack/Email notification here if needed
+    <application
+        android:label="Chatly"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="false"
+        android:allowBackup="false">
+        
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"/>
+            
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        
+        <!-- Firebase Messaging -->
+        <service
+            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+        
+        <!-- Firebase -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_color" />
+    </application>
+</manifest>
