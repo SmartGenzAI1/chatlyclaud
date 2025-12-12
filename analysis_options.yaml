@@ -1,0 +1,46 @@
+# ============================================================================
+# FILE: analysis_options.yaml
+# PURPOSE: Dart analyzer configuration
+# ============================================================================
+
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # Error rules
+    avoid_empty_else: true
+    avoid_print: true
+    avoid_returning_null_for_future: true
+    avoid_slow_async_io: true
+    avoid_type_to_string: true
+    cancel_subscriptions: true
+    close_sinks: true
+    comment_references: true
+    
+    # Style rules
+    always_declare_return_types: true
+    always_put_required_named_parameters_first: true
+    annotate_overrides: true
+    avoid_bool_literals_in_conditional_expressions: true
+    avoid_redundant_argument_values: true
+    avoid_unnecessary_containers: true
+    constant_identifier_names: true
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    prefer_final_fields: true
+    prefer_final_locals: true
+    prefer_single_quotes: true
+    require_trailing_commas: true
+    sort_constructors_first: true
+    use_key_in_widget_constructors: true
+    use_super_parameters: true
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  errors:
+    # Treat missing required parameters as errors
+    missing_required_param: error
+    # Treat missing return types as errors
+    always_declare_return_types: error
