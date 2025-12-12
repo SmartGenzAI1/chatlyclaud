@@ -1,8 +1,7 @@
-
-# ============================================================================
-# FILE: android/app/build.gradle
-# PURPOSE: Android app configuration for APK builds
-# ============================================================================
+// ============================================================================
+// FILE: android/app/build.gradle
+// PURPOSE: Android app configuration for APK builds
+// ============================================================================
 
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
