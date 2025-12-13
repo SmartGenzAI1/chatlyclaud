@@ -1,65 +1,87 @@
-// # ============================================================================
+name: Build & Release Android APK
 
-//
-# FILE: android/app/src/main/AndroidManifest.xml
-// # PURPOSE: Android app manifest with permissions
-// # ============================================================================
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    
-    <!-- Permissions -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    
-    <application
-        android:label="Chatly"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="false"
-        android:allowBackup="false">
-        
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:launchMode="singleTop"
-            android:theme="@style/LaunchTheme"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true"
-            android:windowSoftInputMode="adjustResize">
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -------------------------
+      # Java (Required by Gradle)
+      # -------------------------
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # -------------------------
+      # Flutter SDK
+      # -------------------------
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+          channel: 'stable'
+          cache: true
+
+      # -------------------------
+      # Flutter dependencies
+      # -------------------------
+      - name: Install dependencies
+        run: flutter pub get
+
+      # -------------------------
+      # Clean (important for CI)
+      # -------------------------
+      - name: Flutter clean
+        run: flutter clean
+
+      # -------------------------
+      # Build APK
+      # -------------------------
+      - name: Build release APK
+        run: flutter build apk --release
+
+      # -------------------------
+      # Upload APK artifact
+      # -------------------------
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: chatly-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Download APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: chatly-release-apk
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app-release.apk
+          tag_name: v${{ github.run_number }}
+          name: Chatly Release v${{ github.run_number }}
+          body: |
+            🚀 Automated release build
             
-            <meta-data
-              android:name="io.flutter.embedding.android.NormalTheme"
-              android:resource="@style/NormalTheme"/>
+            - Flutter APK (Release)
+            - Built from main branch
             
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-        
-        <!-- Firebase Messaging -->
-        <service
-            android:name="com.google.firebase.messaging.FirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
-            </intent-filter>
-        </service>
-        
-        <meta-data
-            android:name="flutterEmbedding"
-            android:value="2" />
-        
-        <!-- Firebase -->
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_notification" />
-        
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/notification_color" />
-    </application>
-</manifest>
