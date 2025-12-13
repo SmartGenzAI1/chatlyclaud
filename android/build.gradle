@@ -1,14 +1,5 @@
-// ============================================================================
-//# FILE: android/build.gradle
-//# PURPOSE: Project-level Gradle configuration
-//# ============================================================================//
-
 buildscript {
     ext.kotlin_version = '1.9.0'
-    repositories {
-        google()
-        mavenCentral()
-    }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.0'
@@ -18,18 +9,13 @@ buildscript {
 }
 
 allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
+    // DO NOT add repositories here
 }
 
 rootProject.buildDir = '../build'
+
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
-    project.evaluationDependsOn(':app')
 }
 
 tasks.register("clean", Delete) {
