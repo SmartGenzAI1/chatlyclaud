@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Chatly">
+  <meta name="description" content="Secure, anonymous, and premium messaging app with end-to-end encryption">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="Chatly - Secure Anonymous Chat">
+  <meta property="og:description" content="Secure, anonymous, and premium messaging app with end-to-end encryption">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://chatly.app">
+  <meta property="og:image" content="/icons/Icon-512.png">
+  
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Chatly - Secure Anonymous Chat">
+  <meta name="twitter:description" content="Secure, anonymous, and premium messaging app with end-to-end encryption">
+  <meta name="twitter:image" content="/icons/Icon-512.png">
+  
+  <!-- Preload critical resources -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="icons/Icon-192.png">
+  
+  <!-- Preconnect to external domains -->
+  <link rel="preconnect" href="https://*.firebaseio.com">
+  <link rel="preconnect" href="https://*.googleapis.com">
+  <link rel="preconnect" href="https://*.gstatic.com">
+  
+  <title>Chatly - Secure Anonymous Chat</title>
+  
+  <style>
+    /* Loading screen styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f3f4f6;
+      color: #1f2937;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    #loader {
+      text-align: center;
+    }
+    
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      border-radius: 20px;
+      margin: 0 auto 20px;
+      position: relative;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+      animation: pulse 2s infinite;
+    }
+    
+    .logo::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .loading-text {
+      font-size: 16px;
+      color: #6b7280;
+      margin-bottom: 20px;
+    }
+    
+    .progress-bar {
+      width: 200px;
+      height: 4px;
+      background-color: #e5e7eb;
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2563eb, #7c3aed);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    
+    /* Hide loader when app is ready */
+    .flutter-app-ready #loader {
+      display: none;
+    }
+    
+    /* Error state */
+    .error-state {
+      display: none;
+      color: #ef4444;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .error-state.show {
+      display: block;
+    }
+    
+    .retry-btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 15px;
+      transition: background 0.2s;
+    }
+    
+    .retry-btn:hover {
+      background: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+  <div id="loader">
+    <div class="logo"></div>
+    <div class="loading-text">Initializing Chatly...</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+  
+  <div class="error-state" id="errorState">
+    <h3>Connection Error</h3>
+    <p>Unable to connect to Chatly servers. Please check your internet connection and try again.</p>
+    <button class="retry-btn" onclick="location.reload()">Retry</button>
+  </div>
+
+  <!-- Flutter Web App -->
+  <script src="main.dart.js" type="application/javascript"></script>
+  
+  <!-- Service Worker Registration -->
+  <script>
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        try {
+          const registration = await navigator.serviceWorker.register('serviceworker.js');
+          console.log('SW registered: ', registration);
+        } catch (registrationError) {
+          console.log('SW registration failed: ', registrationError);
+        }
+      });
+    }
+    
+    // Progressive loading
+    let progress = 0;
+    const progressFill = document.getElementById('progressFill');
+    
+    function updateProgress(amount) {
+      progress += amount;
+      if (progress > 100) progress = 100;
+      progressFill.style.width = progress + '%';
+    }
+    
+    // Simulate loading progress
+    setInterval(() => {
+      if (progress < 90) {
+        updateProgress(5);
+      }
+    }, 500);
+    
+    // Error handling
+    window.addEventListener('error', (event) => {
+      document.getElementById('errorState').classList.add('show');
+      document.getElementById('loader').style.display = 'none';
+    });
+    
+    // Network error handling
+    window.addEventListener('online', () => {
+      document.getElementById('errorState').classList.remove('show');
+    });
+    
+    window.addEventListener('offline', () => {
+      if (!document.getElementById('errorState').classList.contains('show')) {
+        document.getElementById('errorState').innerHTML = 
+          '<h3>Offline</h3><p>You are now offline. Some features may be limited.</p>';
+        document.getElementById('errorState').classList.add('show');
+      }
+    });
+    
+    // Performance monitoring
+    window.addEventListener('load', () => {
+      updateProgress(100);
+      
+      // Mark app as ready
+      document.body.classList.add('flutter-app-ready');
+      
+      // Performance metrics
+      if ('performance' in window) {
+        setTimeout(() => {
+          const perfData = performance.getEntriesByType('navigation')[0];
+          console.log('Page load time:', perfData.loadEventEnd - perfData.loadEventStart);
+        }, 1000);
+      }
+    });
+    
+    // Security monitoring
+    (function() {
+      // Prevent right-click context menu
+      document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+      });
+      
+      // Prevent text selection in sensitive areas
+      document.addEventListener('selectstart', (e) => {
+        if (e.target.closest('.sensitive-content')) {
+          e.preventDefault();
+        }
+      });
+      
+      // Monitor for potential XSS attempts
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                const html = node.outerHTML || '';
+                if (html.includes('<script') || html.includes('javascript:')) {
+                  console.warn('Potential XSS attempt detected:', html);
+                  node.remove();
+                }
+              }
+            });
+          }
+        });
+      });
+      
+      observer.observe(document.body, { childList: true, subtree: true });
+    })();
+  </script>
+</body>
+</html>

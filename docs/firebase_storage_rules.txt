@@ -1,0 +1,119 @@
+// Firebase Storage Security Rules for Chatly App
+// These rules ensure file security and privacy
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Public files (app assets, etc.)
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if false; // No public uploads
+    }
+
+    // User profile images
+    match /profile_images/{userId}/{imageId} {
+      allow read: if request.auth != null && 
+                  (request.auth.uid == userId || 
+                   request.auth.token.isAdmin == true);
+      allow create: if request.auth != null && 
+                    request.auth.uid == userId &&
+                    request.resource.size < 2 * 1024 * 1024 && // 2MB limit
+                    request.resource.contentType.matches('image/.*');
+      allow update: if request.auth != null && 
+                    request.auth.uid == userId &&
+                    request.resource.size < 2 * 1024 * 1024 && // 2MB limit
+                    request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null && 
+                    request.auth.uid == userId;
+    }
+
+    // Chat media files (images, videos, audio)
+    match /chat_media/{userId}/{chatId}/{mediaId} {
+      allow read: if request.auth != null && 
+                  (request.auth.uid == userId || 
+                   request.auth.token.isAdmin == true);
+      allow create: if request.auth != null && 
+                    request.auth.uid == userId &&
+                    request.resource.size < 10 * 1024 * 1024 && // 10MB limit
+                    request.resource.contentType.matches('image/.*') ||
+                    request.resource.contentType.matches('video/.*') ||
+                    request.resource.contentType.matches('audio/.*');
+      allow update: if false; // Media files cannot be updated
+      allow delete: if request.auth != null && 
+                    request.auth.uid == userId;
+    }
+
+    // Group media files
+    match /group_media/{groupId}/{mediaId} {
+      allow read: if request.auth != null && 
+                  resource.metadata.members_list.hasAny([request.auth.uid]) ||
+                  request.auth.token.isAdmin == true;
+      allow create: if request.auth != null && 
+                    request.auth.token.isAnonymous == false &&
+                    request.resource.size < 25 * 1024 * 1024 && // 25MB limit
+                    request.resource.contentType.matches('image/.*') ||
+                    request.resource.contentType.matches('video/.*') ||
+                    request.resource.contentType.matches('audio/.*');
+      allow update: if false; // Media files cannot be updated
+      allow delete: if request.auth != null && 
+                    request.auth.token.isAdmin == true;
+    }
+
+    // Anonymous chat media
+    match /anonymous_media/{chatId}/{mediaId} {
+      allow read: if true; // Anonymous media is public
+      allow create: if request.auth != null && 
+                    request.auth.token.isAnonymous == false &&
+                    request.resource.size < 5 * 1024 * 1024 && // 5MB limit
+                    request.resource.contentType.matches('image/.*');
+      allow update: if false; // Media files cannot be updated
+      allow delete: if request.auth != null && 
+                    request.auth.token.isAdmin == true;
+    }
+
+    // App icons and assets
+    match /app_assets/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+                    request.auth.token.isAdmin == true;
+    }
+
+    // Temporary uploads (for processing)
+    match /temp_uploads/{userId}/{uploadId} {
+      allow read: if request.auth != null && 
+                  request.auth.uid == userId;
+      allow create: if request.auth != null && 
+                    request.auth.uid == userId &&
+                    request.resource.size < 50 * 1024 * 1024 && // 50MB limit
+                    request.time < request.auth.token.upload_expires_at;
+      allow update: if false;
+      allow delete: if request.auth != null && 
+                    request.auth.uid == userId;
+    }
+
+    // Encrypted files (for secure storage)
+    match /encrypted_files/{userId}/{fileId} {
+      allow read: if request.auth != null && 
+                  request.auth.uid == userId;
+      allow create: if request.auth != null && 
+                    request.auth.uid == userId &&
+                    request.resource.metadata.hasAll(['encryption_key', 'iv']) &&
+                    request.resource.size < 100 * 1024 * 1024; // 100MB limit
+      allow update: if false;
+      allow delete: if request.auth != null && 
+                    request.auth.uid == userId;
+    }
+
+    // Backup files (admin only)
+    match /backups/{backupId} {
+      allow read, write: if request.auth != null && 
+                          request.auth.token.isAdmin == true;
+    }
+
+    // Logs and monitoring files (admin only)
+    match /logs/{logId} {
+      allow read, write: if request.auth != null && 
+                          request.auth.token.isAdmin == true;
+    }
+  }
+}

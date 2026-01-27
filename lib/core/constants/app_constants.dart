@@ -14,6 +14,12 @@ class AppConstants {
   static const String unsplashApiKey = 'YOUR_UNSPLASH_API_KEY';
   static const String perspectiveApiKey = 'YOUR_PERSPECTIVE_API_KEY';
   
+  // Supabase Configuration (Optional)
+  static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL', 
+      defaultValue: 'https://your-project.supabase.co');
+  static const String supabaseKey = String.fromEnvironment('SUPABASE_KEY', 
+      defaultValue: 'your-anon-key');
+  
   // Firebase Collections
   static const String usersCollection = 'users';
   static const String chatsCollection = 'chats';

@@ -5,6 +5,15 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Message type enum for different media types
+enum MessageType {
+  text,
+  image,
+  audio,
+  video,
+  file
+}
+
 class MessageModel {
   final String messageId;
   final String chatId;
@@ -16,6 +25,11 @@ class MessageModel {
   final bool isEncrypted;
   final Map<String, List<String>> reactions;
   final String? replyToMessageId;
+  final MessageType messageType;
+  final String? mediaUrl;
+  final String? mediaThumbnailUrl;
+  final int? mediaSize;
+  final Duration? audioDuration;
   
   MessageModel({
     required this.messageId,
@@ -28,6 +42,11 @@ class MessageModel {
     this.isEncrypted = true,
     this.reactions = const {},
     this.replyToMessageId,
+    this.messageType = MessageType.text,
+    this.mediaUrl,
+    this.mediaThumbnailUrl,
+    this.mediaSize,
+    this.audioDuration,
   });
   
   factory MessageModel.fromFirestore(DocumentSnapshot doc) {
@@ -48,6 +67,16 @@ class MessageModel {
         ),
       ),
       replyToMessageId: data['replyToMessageId'],
+      messageType: MessageType.values.firstWhere(
+        (type) => type.name == (data['messageType'] ?? 'text'),
+        orElse: () => MessageType.text,
+      ),
+      mediaUrl: data['mediaUrl'],
+      mediaThumbnailUrl: data['mediaThumbnailUrl'],
+      mediaSize: data['mediaSize'],
+      audioDuration: data['audioDuration'] != null 
+        ? Duration(milliseconds: data['audioDuration'])
+        : null,
     );
   }
   
@@ -62,6 +91,11 @@ class MessageModel {
       'isEncrypted': isEncrypted,
       'reactions': reactions,
       'replyToMessageId': replyToMessageId,
+      'messageType': messageType.name,
+      'mediaUrl': mediaUrl,
+      'mediaThumbnailUrl': mediaThumbnailUrl,
+      'mediaSize': mediaSize,
+      'audioDuration': audioDuration?.inMilliseconds,
     };
   }
   
@@ -75,12 +109,14 @@ class MessageModel {
   MessageModel addReaction(String emoji, String userId) {
     final newReactions = Map<String, List<String>>.from(reactions);
     
-    if (newReactions.containsKey(emoji)) {
-      if (!newReactions[emoji]!.contains(userId)) {
-        newReactions[emoji]!.add(userId);
-      }
-    } else {
-      newReactions[emoji] = [userId];
+    // Initialize the emoji list if it doesn't exist
+    if (!newReactions.containsKey(emoji)) {
+      newReactions[emoji] = [];
+    }
+    
+    // Add user to the reaction list if not already present
+    if (!newReactions[emoji]!.contains(userId)) {
+      newReactions[emoji]!.add(userId);
     }
     
     return MessageModel(

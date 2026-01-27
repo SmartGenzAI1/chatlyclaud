@@ -67,6 +67,10 @@ class ChatProvider extends ChangeNotifier {
     
     try {
       await _chatService.sendMessage(chatId, senderId, text, retentionDays);
+      
+      // Refresh messages to include the new message
+      loadMessages(chatId);
+      
       return true;
     } catch (e, stackTrace) {
       _error = ErrorHandler.getUserFriendlyError(e);

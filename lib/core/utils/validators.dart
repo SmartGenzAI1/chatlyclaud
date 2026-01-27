@@ -21,7 +21,7 @@ class Validators {
     return null;
   }
   
-  /// Validate password strength
+  /// Validate password strength (Enhanced security)
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
@@ -41,6 +41,30 @@ class Validators {
     
     if (!value.contains(RegExp(r'[0-9]'))) {
       return 'Password must contain at least one number';
+    }
+    
+    // Check for special characters
+    if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+      return 'Password must contain at least one special character';
+    }
+    
+    // Check for common patterns
+    final commonPatterns = [
+      RegExp(r'(.)\1{2,}'), // Repeated characters (aaa, 111)
+      RegExp(r'(012|123|234|345|456|567|678|789|890)'), // Sequential numbers
+      RegExp(r'(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)'), // Sequential letters
+    ];
+    
+    for (final pattern in commonPatterns) {
+      if (pattern.hasMatch(value.toLowerCase())) {
+        return 'Password cannot contain common patterns or sequences';
+      }
+    }
+    
+    // Check against common passwords (simplified check)
+    final commonPasswords = ['password', '12345678', 'qwerty123', 'admin123'];
+    if (commonPasswords.contains(value.toLowerCase())) {
+      return 'Password is too common. Please choose a more unique password';
     }
     
     return null;

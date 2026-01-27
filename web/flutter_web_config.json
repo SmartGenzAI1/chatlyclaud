@@ -1,0 +1,189 @@
+{
+  "flutter": {
+    "web": {
+      "enableServiceWorker": true,
+      "serviceWorkerUrl": "serviceworker.js",
+      "enablePWA": true,
+      "manifestUrl": "manifest.json",
+      "enablePushNotifications": true,
+      "enableBackgroundSync": true,
+      "enableOfflineSupport": true,
+      "enableSecurityHeaders": true,
+      "enableCORS": true,
+      "enableRateLimiting": true,
+      "enableInputValidation": true
+    },
+    "performance": {
+      "enableLazyLoading": true,
+      "enableCaching": true,
+      "enableCompression": true,
+      "enableCDN": true,
+      "optimizeImages": true,
+      "optimizeFonts": true
+    },
+    "security": {
+      "enableCSP": true,
+      "enableXSSProtection": true,
+      "enableFrameOptions": true,
+      "enableContentTypeOptions": true,
+      "enableHSTS": true,
+      "enableReferrerPolicy": true,
+      "enablePermissionsPolicy": true
+    },
+    "compatibility": {
+      "supportedBrowsers": [
+        "Chrome >= 80",
+        "Firefox >= 75",
+        "Safari >= 13",
+        "Edge >= 80"
+      ],
+      "polyfills": [
+        "Promise",
+        "fetch",
+        "URL",
+        "URLSearchParams"
+      ]
+    },
+    "monitoring": {
+      "enableErrorTracking": true,
+      "enablePerformanceMonitoring": true,
+      "enableUserAnalytics": true,
+      "enableSecurityMonitoring": true,
+      "enableNetworkMonitoring": true
+    }
+  },
+  "pwa": {
+    "name": "Chatly - Secure Anonymous Chat",
+    "shortName": "Chatly",
+    "description": "Secure, anonymous, and premium messaging app with end-to-end encryption",
+    "themeColor": "#2563eb",
+    "backgroundColor": "#2563eb",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "startUrl": "/",
+    "icons": [
+      {
+        "src": "icons/Icon-72.png",
+        "sizes": "72x72",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "icons/Icon-96.png",
+        "sizes": "96x96",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "icons/Icon-128.png",
+        "sizes": "128x128",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "icons/Icon-144.png",
+        "sizes": "144x144",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "icons/Icon-152.png",
+        "sizes": "152x152",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "icons/Icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "icons/Icon-384.png",
+        "sizes": "384x384",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "icons/Icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any maskable"
+      }
+    ]
+  },
+  "security": {
+    "csp": {
+      "defaultSrc": ["'self'"],
+      "scriptSrc": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      "styleSrc": ["'self'", "'unsafe-inline'"],
+      "imgSrc": ["'self'", "data:", "https:"],
+      "connectSrc": ["'self'", "https://*.firebaseio.com"],
+      "fontSrc": ["'self'", "https://*.googleapis.com"],
+      "objectSrc": ["'none'"],
+      "mediaSrc": ["'self'", "data:", "https:"]
+    },
+    "cors": {
+      "allowedOrigins": [
+        "https://chatly.app",
+        "https://www.chatly.app",
+        "https://chatly-web.vercel.app",
+        "https://chatly.pages.dev"
+      ],
+      "allowedMethods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      "allowedHeaders": ["Content-Type", "Authorization", "X-Requested-With"],
+      "credentials": true
+    },
+    "rateLimiting": {
+      "windowMs": 900000,
+      "maxRequests": 100,
+      "message": "Too many requests from this IP"
+    }
+  },
+  "performance": {
+    "caching": {
+      "staticAssets": {
+        "maxAge": "1y",
+        "cacheControl": "public, max-age=31536000"
+      },
+      "apiResponses": {
+        "maxAge": "5m",
+        "cacheControl": "public, max-age=300"
+      }
+    },
+    "compression": {
+      "enabled": true,
+      "algorithms": ["gzip", "brotli"],
+      "threshold": 1024
+    },
+    "lazyLoading": {
+      "images": true,
+      "components": true,
+      "routes": true
+    }
+  },
+  "monitoring": {
+    "errorTracking": {
+      "enabled": true,
+      "service": "sentry",
+      "dsn": "https://your-sentry-dsn@sentry.io/project-id"
+    },
+    "performance": {
+      "enabled": true,
+      "metrics": ["FCP", "LCP", "FID", "CLS", "TTFB"],
+      "thresholds": {
+        "FCP": 1800,
+        "LCP": 2500,
+        "FID": 100,
+        "CLS": 0.1,
+        "TTFB": 600
+      }
+    },
+    "analytics": {
+      "enabled": true,
+      "service": "google-analytics",
+      "trackingId": "GA_MEASUREMENT_ID"
+    }
+  }
+}

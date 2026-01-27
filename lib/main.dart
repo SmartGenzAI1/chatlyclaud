@@ -21,6 +21,8 @@ import 'providers/chat_provider.dart';
 import 'providers/subscription_provider.dart';
 import 'router/app_router.dart';
 import 'services/notification_service.dart';
+import 'services/analytics_service.dart';
+import 'services/performance_monitor.dart';
 
 /// Global navigator key for navigation without context
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -61,8 +63,30 @@ void main() async {
 }
 
 /// Main application widget with multi-provider setup
-class ChatlyApp extends StatelessWidget {
+class ChatlyApp extends StatefulWidget {
   const ChatlyApp({super.key});
+
+  @override
+  State<ChatlyApp> createState() => _ChatlyAppState();
+}
+
+class _ChatlyAppState extends State<ChatlyApp> {
+  final AnalyticsService _analyticsService = AnalyticsService();
+  final PerformanceMonitor _performanceMonitor = PerformanceMonitor();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeServices();
+  }
+
+  Future<void> _initializeServices() async {
+    // Log app open event
+    await _analyticsService.logAppOpen();
+    
+    // Monitor app startup performance
+    await PerformanceMonitor.monitorAppStartup();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +108,9 @@ class ChatlyApp extends StatelessWidget {
             themeMode: themeProvider.themeMode,
             onGenerateRoute: AppRouter.generateRoute,
             initialRoute: AppRouter.splash,
+            navigatorObservers: [
+              _analyticsService.observer,
+            ],
           );
         },
       ),
