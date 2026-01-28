@@ -1,10 +1,28 @@
+<div align="center">
+
 # 🔐 Chatly - Enterprise-Grade Secure Messaging Platform
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.19+-blue?logo=flutter&logoColor=white)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-3.3+-blue?logo=dart&logoColor=white)](https://dart.dev)
-[![Firebase](https://img.shields.io/badge/Firebase-Latest-orange?logo=firebase&logoColor=white)](https://firebase.google.com)
-[![Security](https://img.shields.io/badge/Security-Enterprise--grade-green?logo=shield)](https://github.com/SmartGenzAI1/chatlyclaud)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+### Live Statistics
+
+![GitHub Stars](https://img.shields.io/github/stars/SmartGenzAI1/chatlyclaud?style=for-the-badge&logo=github&color=yellow)
+![GitHub Forks](https://img.shields.io/github/forks/SmartGenzAI1/chatlyclaud?style=for-the-badge&logo=github&color=blue)
+![GitHub Watchers](https://img.shields.io/github/watchers/SmartGenzAI1/chatlyclaud?style=for-the-badge&logo=github&color=green)
+![GitHub Issues](https://img.shields.io/github/issues/SmartGenzAI1/chatlyclaud?style=for-the-badge&logo=github&color=red)
+
+![Profile Views](https://komarev.com/ghpvc/?username=SmartGenzAI1&repo=chatlyclaud&style=for-the-badge&color=brightgreen)
+![GitHub Contributors](https://img.shields.io/github/contributors/SmartGenzAI1/chatlyclaud?style=for-the-badge&color=orange)
+![GitHub Last Commit](https://img.shields.io/github/last-commit/SmartGenzAI1/chatlyclaud?style=for-the-badge&color=purple)
+![GitHub Repo Size](https://img.shields.io/github/repo-size/SmartGenzAI1/chatlyclaud?style=for-the-badge&color=blue)
+
+### Technology Stack
+
+[![Flutter](https://img.shields.io/badge/Flutter-3.19+-blue?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.3+-blue?style=flat-square&logo=dart&logoColor=white)](https://dart.dev)
+[![Firebase](https://img.shields.io/badge/Firebase-Latest-orange?style=flat-square&logo=firebase&logoColor=white)](https://firebase.google.com)
+[![Security](https://img.shields.io/badge/Security-Enterprise--grade-green?style=flat-square&logo=shield)](https://github.com/SmartGenzAI1/chatlyclaud)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+
+</div>
 
 > **Production-ready messaging platform with military-grade encryption, real-time threat detection, and enterprise security standards**
 
@@ -380,13 +398,54 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
+## 📊 Repository Statistics & Activity
+
+<div align="center">
+
+### GitHub Activity Graph
+![Activity Graph](https://activity-graph.herokuapp.com/graph?username=SmartGenzAI1&repo=chatlyclaud&theme=react-dark&hide_border=true&area=true)
+
+### Contribution Stats
+![GitHub Stats](https://github-readme-stats.vercel.app/api?username=SmartGenzAI1&show_icons=true&theme=radical&include_all_commits=true&count_private=true)
+
+### Language Distribution
+![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=SmartGenzAI1&layout=compact&theme=radical&langs_count=8)
+
+### Repository Metrics
+![Repository Card](https://github-readme-stats.vercel.app/api/pin/?username=SmartGenzAI1&repo=chatlyclaud&theme=radical)
+
+</div>
+
+---
+
+## 🌟 Star History
+
+<div align="center">
+
+[![Star History Chart](https://api.star-history.com/svg?repos=SmartGenzAI1/chatlyclaud&type=Date)](https://star-history.com/#SmartGenzAI1/chatlyclaud&Date)
+
+</div>
+
+---
+
 <div align="center">
 
 **Built with 🔐 by SmartGenzAI1**
 
 [![GitHub Stars](https://img.shields.io/github/stars/SmartGenzAI1/chatlyclaud?style=social)](https://github.com/SmartGenzAI1/chatlyclaud)
 [![GitHub Forks](https://img.shields.io/github/forks/SmartGenzAI1/chatlyclaud?style=social)](https://github.com/SmartGenzAI1/chatlyclaud/fork)
+[![GitHub Watchers](https://img.shields.io/github/watchers/SmartGenzAI1/chatlyclaud?style=social)](https://github.com/SmartGenzAI1/chatlyclaud)
+
+### Support the Project
+
+⭐ **Star this repository** if you find it helpful!  
+🍴 **Fork it** to contribute or build your own version!  
+👁️ **Watch** for updates and new features!
+
+---
 
 *Security you can trust. Privacy you deserve.*
+
+**Made with ❤️ and 🔐 for the security-conscious community**
 
 </div>
