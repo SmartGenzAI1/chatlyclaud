@@ -1,0 +1,33 @@
+{
+    "buildCommand": "flutter build web --release --web-renderer canvaskit",
+    "outputDirectory": "build/web",
+    "framework": null,
+    "installCommand": "if [ ! -d flutter ]; then git clone https://github.com/flutter/flutter.git -b stable --depth 1; fi && flutter/bin/flutter doctor && flutter/bin/flutter config --enable-web",
+    "devCommand": "flutter run -d web-server --web-port 3000",
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "/",
+            "status": 200
+        }
+    ],
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "X-Frame-Options",
+                    "value": "SAMEORIGIN"
+                },
+                {
+                    "key": "X-Content-Type-Options",
+                    "value": "nosniff"
+                },
+                {
+                    "key": "Referrer-Policy",
+                    "value": "strict-origin-when-cross-origin"
+                }
+            ]
+        }
+    ]
+}
