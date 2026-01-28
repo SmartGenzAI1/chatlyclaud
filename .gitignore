@@ -46,19 +46,50 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# IMPORTANT: Secrets and sensitive files
-**google-services.json
-**GoogleService-Info.plist
+# ============================================================================
+# SECURITY: Sensitive files that should NEVER be committed
+# ============================================================================
+
+# Environment variables and API keys
 .env
 .env.local
 .env.*.local
-*.keystore
+.env.production
+.env.staging
+
+# Firebase configuration files
+**google-services.json
+**GoogleService-Info.plist
+firebase_options.dart
+lib/firebase_options.dart
+web/firebase-config.js
+
+# Android signing keys
 *.jks
+*.keystore
 key.properties
+android/key.properties
+android/app/keystore.properties
+android/app/upload-keystore.jks
+
+# iOS signing and provisioning
+ios/Runner.xcworkspace/xcuserdata/
+ios/Pods/
+ios/*.mobileprovision
+ios/*.p12
+ios/*.cer
+
+# Private keys and certificates
+*.pem
+*.key
+*.p8
+*.pfx
 
 # Firebase
-firebase_options.dart
 .firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
 
 # Coverage
 coverage/
@@ -66,3 +97,6 @@ coverage/
 
 # Testing
 .test_coverage.dart
+
+# Log files
+flutter_*.log

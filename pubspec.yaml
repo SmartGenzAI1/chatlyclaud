@@ -10,73 +10,68 @@ dependencies:
   flutter:
     sdk: flutter
   
-  # Firebase Core Services
+  # State Management
+  provider: ^6.1.1
+  
+  # Firebase
   firebase_core: ^2.24.2
   firebase_auth: ^4.15.3
-  cloud_firestore: ^4.13.6
   firebase_messaging: ^14.7.9
   firebase_analytics: ^10.8.0
   firebase_crashlytics: ^3.4.8
   firebase_storage: ^11.5.6
   cloud_functions: ^4.5.12
+  cloud_firestore: ^4.13.6
   
-  # State Management
-  provider: ^6.1.1
+  # Security & Encryption
+  encrypt: ^5.0.3
+  pointycastle: ^3.7.3
+  crypto: ^3.0.3
+  flutter_secure_storage: ^9.0.0
+  local_auth: ^2.1.7
+  cryptography: ^2.5.0
   
-  # UI & Design
+  # UI
   google_fonts: ^6.1.0
-  lottie: ^2.7.0
   shimmer: ^3.0.0
-  animated_text_kit: ^4.2.2
-  flutter_svg: ^2.0.9
-  cached_network_image: ^3.3.0
+  lottie: ^3.0.0
+  cached_network_image: ^3.3.1
   
   # Utilities
+  intl: 0.20.2  # Required by flutter_localizations
+  flutter_dotenv: ^5.1.0
+  http: ^1.2.0
+  dio: ^5.4.0
+  sqflite: ^2.3.2
+  path: ^1.8.3
+  path_provider: ^2.1.2
+  permission_handler: ^11.2.0
   shared_preferences: ^2.2.2
-  url_launcher: ^6.2.2
+  url_launcher: ^6.2.4
   connectivity_plus: ^5.0.2
-  package_info_plus: ^5.0.1
   device_info_plus: ^9.1.1
   qr_flutter: ^4.1.0
   qr_code_scanner: ^1.0.1
-  intl: ^0.20.2
-  crypto: ^3.0.3
   
   # Payments & Subscriptions
   in_app_purchase: ^3.1.11
   
-  # HTTP & API
-  http: ^1.1.2
-  dio: ^5.4.0
-  
-  # Local Storage
-  sqflite: ^2.3.0
-  path_provider: ^2.1.1
-  
-  # Permissions
-  permission_handler: ^11.1.0
-  
   # Image Handling
-  image_picker: ^1.0.5
+  image_picker: ^1.0.7
   image_picker_for_web: ^3.0.2
   image: ^4.1.3
   
   # Audio Recording
-  record: ^3.0.0
-  audio_waveforms: ^2.0.2
+  record: ^5.0.4
+  audio_waveforms: ^1.0.5
   just_audio: ^0.9.36
-  just_audio_background: ^0.0.1-beta.8
   
   # Web Support
-  universal_html: ^2.2.0
+  universal_html: ^2.2.4
   js: ^0.6.7
   
-  # Encryption
-  encrypt: ^5.0.1
-  pointycastle: ^3.7.0
-  
   # Supabase (Optional)
-  supabase: ^2.3.0
+  supabase: ^2.0.4
   
   # Localization
   flutter_localizations:
@@ -91,4 +86,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  
+  assets:
+    - .env
+    - assets/
+    - assets/images/
+    - assets/animations/

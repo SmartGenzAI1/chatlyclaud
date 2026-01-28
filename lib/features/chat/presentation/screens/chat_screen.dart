@@ -6,12 +6,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/constants/theme_constants.dart';
-import '../../../../core/widgets/common/loading_indicator.dart';
-import '../../../../providers/auth_provider.dart';
-import '../../../../providers/chat_provider.dart';
-import '../../../../data/models/message_model.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/themes/modern_colors.dart';
+import '../../../core/themes/app_spacing.dart';
+import '../../../core/widgets/common/loading_indicator.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/chat_provider.dart';
+import '../../../data/models/message_model.dart';
+import '../widgets/modern_message_bubble.dart';
+import '../widgets/enhanced_input_bar.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatId;
@@ -101,128 +104,39 @@ class _ChatScreenState extends State<ChatScreen> {
                 : ListView.builder(
                     controller: _scrollController,
                     reverse: true,
-                    padding: const EdgeInsets.all(16),
+                    padding: AppSpacing.allMD,
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final message = messages[index];
                       final isMe = message.senderId == authProvider.user!.uid;
                       
-                      return _buildMessageBubble(message, isMe);
+                      return ModernMessageBubble(
+                        message: message,
+                        isMe: isMe,
+                        onSwipeReply: () {
+                          // TODO: Implement reply functionality
+                        },
+                        onLongPress: () {
+                          // TODO: Show message options
+                        },
+                      );
                     },
                   ),
           ),
           
-          // Input area
-          _buildInputArea(authProvider, chatProvider),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildMessageBubble(MessageModel message, bool isMe) {
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.7,
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppConstants.paddingMedium,
-          vertical: AppConstants.paddingSmall,
-        ),
-        decoration: BoxDecoration(
-          color: isMe
-              ? ThemeConstants.sentMessageBubble
-              : ThemeConstants.receivedMessageBubble,
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              message.text,
-              style: TextStyle(
-                color: isMe ? Colors.white : Colors.black87,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  DateFormat.jm().format(message.timestamp),
-                  style: TextStyle(
-                    color: isMe ? Colors.white70 : Colors.black54,
-                    fontSize: 12,
-                  ),
-                ),
-                if (isMe) ...[
-                  const SizedBox(width: 4),
-                  Icon(
-                    message.readBy.length > 1 ? Icons.done_all : Icons.done,
-                    size: 16,
-                    color: message.readBy.length > 1
-                        ? Colors.blue.shade300
-                        : Colors.white70,
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildInputArea(AuthProvider authProvider, ChatProvider chatProvider) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
+          // Enhanced input area
+          EnhancedInputBar(
+            controller: _messageController,
+            onSendMessage: () => _sendMessage(authProvider, chatProvider),
+            onAttachmentTap: () {
               // TODO: Show attachment options
             },
-          ),
-          Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: const InputDecoration(
-                hintText: 'Type a message...',
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 16),
-              ),
-              maxLines: null,
-              textCapitalization: TextCapitalization.sentences,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.emoji_emotions_outlined),
-            onPressed: () {
+            onEmojiTap: () {
               // TODO: Show emoji picker
             },
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.send,
-              color: _messageController.text.isEmpty
-                  ? Colors.grey
-                  : ThemeConstants.primaryIndigo,
-            ),
-            onPressed: () => _sendMessage(authProvider, chatProvider),
+            onVoiceTap: () {
+              // TODO: Start voice recording
+            },
           ),
         ],
       ),

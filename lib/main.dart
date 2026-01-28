@@ -10,11 +10,11 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/constants/app_constants.dart';
-import 'core/themes/app_theme.dart';
+import 'core/themes/modern_theme.dart';
 import 'core/errors/error_handler.dart';
+import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/chat_provider.dart';
@@ -31,8 +31,10 @@ void main() async {
   // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase
-  await Firebase.initializeApp();
+  // Initialize Firebase with platform-specific options
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   
   // Initialize Crashlytics
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
@@ -56,8 +58,8 @@ void main() async {
   
   // Run app with error handling
   runApp(
-    ErrorHandler(
-      child: const ChatlyApp(),
+    const ErrorHandler(
+      child: ChatlyApp(),
     ),
   );
 }
@@ -72,7 +74,6 @@ class ChatlyApp extends StatefulWidget {
 
 class _ChatlyAppState extends State<ChatlyApp> {
   final AnalyticsService _analyticsService = AnalyticsService();
-  final PerformanceMonitor _performanceMonitor = PerformanceMonitor();
 
   @override
   void initState() {
@@ -103,8 +104,8 @@ class _ChatlyAppState extends State<ChatlyApp> {
             title: AppConstants.appName,
             debugShowCheckedModeBanner: false,
             navigatorKey: navigatorKey,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
+            theme: ModernTheme.lightTheme,
+            darkTheme: ModernTheme.darkTheme,
             themeMode: themeProvider.themeMode,
             onGenerateRoute: AppRouter.generateRoute,
             initialRoute: AppRouter.splash,

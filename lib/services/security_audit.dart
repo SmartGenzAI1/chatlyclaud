@@ -3,6 +3,7 @@
 // PURPOSE: Security audit and monitoring service
 // ============================================================================
 
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info_plus/device_info_plus.dart';

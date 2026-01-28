@@ -264,7 +264,7 @@ class AnalyticsService {
       items: [
         AnalyticsEventItem(
           itemId: subscriptionType,
-          itemName: '$subscriptionType_subscription',
+          itemName: '${subscriptionType}_subscription',
           price: price,
         ),
       ],
