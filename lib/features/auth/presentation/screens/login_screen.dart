@@ -1,6 +1,6 @@
 // ============================================================================
 // FILE: lib/features/auth/presentation/screens/login_screen.dart
-// PURPOSE: User login screen
+// PURPOSE: Premium login screen with branding and eye-toggle
 // ============================================================================
 
 import 'package:flutter/material.dart';
@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 import '../../../../core/widgets/common/custom_button.dart';
 import '../../../../core/widgets/common/custom_textfield.dart';
 import '../../../../core/utils/validators.dart';
-import '../../../../core/errors/error_handler.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../../router/app_router.dart';
 
@@ -19,147 +18,285 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+  bool _obscurePassword = true;
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
+    _fadeController.forward();
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 48),
-                
-                // Logo
-                const Icon(
-                  Icons.chat_bubble_rounded,
-                  size: 80,
-                  color: Colors.blue,
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Title
-                Text(
-                  'Welcome Back!',
-                  style: Theme.of(context).textTheme.displaySmall,
-                  textAlign: TextAlign.center,
-                ),
-                
-                const SizedBox(height: 48),
-                
-                // Email field
-                CustomTextField(
-                  controller: _emailController,
-                  label: 'Email',
-                  keyboardType: TextInputType.emailAddress,
-                  prefixIcon: const Icon(Icons.email),
-                  validator: Validators.validateEmail,
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Password field
-                CustomTextField(
-                  controller: _passwordController,
-                  label: 'Password',
-                  obscureText: true,
-                  prefixIcon: const Icon(Icons.lock),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Password is required';
-                    }
-                    return null;
-                  },
-                ),
-                
-                const SizedBox(height: 8),
-                
-                // Forgot password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      AppRouter.navigateTo(context, AppRouter.forgotPassword);
-                    },
-                    child: const Text('Forgot Password?'),
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: CustomScrollView(
+          slivers: [
+            // Gradient header
+            SliverToBoxAdapter(
+              child: Container(
+                height: 260,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [colorScheme.primary, colorScheme.tertiary],
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
                   ),
                 ),
-                
-                const SizedBox(height: 24),
-                
-                // Error message
-                if (authProvider.error != null)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      authProvider.error!,
-                      style: TextStyle(color: Colors.red.shade900),
-                    ),
+                child: SafeArea(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: const Icon(Icons.chat_bubble_rounded,
+                            size: 44, color: Colors.white),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Welcome Back!',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Sign in to continue',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.85),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ),
-                
-                // Login button
-                CustomButton(
-                  text: 'Login',
-                  onPressed: _handleLogin,
-                  isLoading: authProvider.isLoading,
-                  width: double.infinity,
                 ),
-                
-                const SizedBox(height: 24),
-                
-                // Sign up link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Don't have an account? "),
-                    TextButton(
-                      onPressed: () {
-                        AppRouter.navigateAndReplace(context, AppRouter.signup);
-                      },
-                      child: const Text('Sign Up'),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
+
+            // Form
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 8),
+
+                      // Email
+                      CustomTextField(
+                        controller: _emailController,
+                        label: 'Email',
+                        keyboardType: TextInputType.emailAddress,
+                        prefixIcon: const Icon(Icons.email_outlined),
+                        validator: Validators.validateEmail,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Password
+                      CustomTextField(
+                        controller: _passwordController,
+                        label: 'Password',
+                        obscureText: _obscurePassword,
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(_obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined),
+                          onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword),
+                        ),
+                        validator: (v) => (v == null || v.isEmpty)
+                            ? 'Password is required'
+                            : null,
+                      ),
+
+                      // Forgot
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () => AppRouter.navigateTo(
+                              context, AppRouter.forgotPassword),
+                          child: const Text('Forgot Password?'),
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      // Error
+                      if (authProvider.error != null)
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.red.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline,
+                                  color: Colors.red, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  authProvider.error!,
+                                  style:
+                                      TextStyle(color: Colors.red.shade800),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // Login button
+                      CustomButton(
+                        text: 'Login',
+                        onPressed: _handleLogin,
+                        isLoading: authProvider.isLoading,
+                        width: double.infinity,
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Divider
+                      Row(children: [
+                        Expanded(child: Divider(color: colorScheme.outlineVariant)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text('or continue with',
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  color: colorScheme.onSurface.withOpacity(0.45))),
+                        ),
+                        Expanded(child: Divider(color: colorScheme.outlineVariant)),
+                      ]),
+
+                      const SizedBox(height: 16),
+
+                      // Google Sign-In button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Google Sign-In coming soon! Use email for now.'),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            );
+                          },
+                          icon: Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Center(
+                              child: Text('G',
+                                  style: TextStyle(
+                                    color: Color(0xFF4285F4),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  )),
+                            ),
+                          ),
+                          label: const Text('Continue with Google'),
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14)),
+                            side: BorderSide(color: colorScheme.outlineVariant),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Sign up link
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Don't have an account? ",
+                              style: TextStyle(
+                                  color: colorScheme.onSurface.withOpacity(0.6))),
+                          TextButton(
+                            onPressed: () => AppRouter.navigateAndReplace(
+                                context, AppRouter.signup),
+                            child: const Text('Sign Up'),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // ToS note
+                      Text(
+                        'By continuing, you agree to our Terms of Service and Privacy Policy.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: colorScheme.onSurface.withOpacity(0.35),
+                          height: 1.4,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
-  
+
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
-    
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+    final authProvider =
+        Provider.of<AuthProvider>(context, listen: false);
     final success = await authProvider.signIn(
       _emailController.text.trim(),
       _passwordController.text,
     );
-    
     if (success && mounted) {
       AppRouter.navigateAndRemoveUntil(context, AppRouter.home);
     }

@@ -40,12 +40,9 @@ class ModernTheme {
         errorContainer: ModernColors.errorLight,
         onErrorContainer: ModernColors.errorDark,
         
-        background: ModernColors.lightBackground,
-        onBackground: ModernColors.textPrimaryLight,
-        
         surface: ModernColors.lightSurface,
         onSurface: ModernColors.textPrimaryLight,
-        surfaceVariant: ModernColors.lightSurfaceVariant,
+        surfaceContainerHighest: ModernColors.lightSurfaceVariant,
         onSurfaceVariant: ModernColors.textSecondaryLight,
         
         outline: ModernColors.textTertiaryLight,
@@ -68,7 +65,7 @@ class ModernTheme {
       ),
       
       // Card
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0,
         color: ModernColors.lightSurface,
         shape: RoundedRectangleBorder(
@@ -196,12 +193,9 @@ class ModernTheme {
         errorContainer: ModernColors.errorDark,
         onErrorContainer: ModernColors.errorLight,
         
-        background: ModernColors.darkBackground,
-        onBackground: ModernColors.textPrimaryDark,
-        
         surface: ModernColors.darkSurface,
         onSurface: ModernColors.textPrimaryDark,
-        surfaceVariant: ModernColors.darkSurfaceVariant,
+        surfaceContainerHighest: ModernColors.darkSurfaceVariant,
         onSurfaceVariant: ModernColors.textSecondaryDark,
         
         outline: ModernColors.textTertiaryDark,
@@ -224,7 +218,7 @@ class ModernTheme {
       ),
       
       // Card
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0,
         color: ModernColors.darkSurface,
         shape: RoundedRectangleBorder(

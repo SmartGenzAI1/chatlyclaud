@@ -2,6 +2,7 @@
 // FILE: lib/core/utils/validators.dart
 // PURPOSE: Input validation utilities
 // ============================================================================
+import '../constants/app_constants.dart';
 
 class Validators {
   /// Validate email format

@@ -4,7 +4,6 @@
 // ============================================================================
 
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/material.dart';
 
 class AnalyticsService {
@@ -361,9 +360,9 @@ class AnalyticsService {
 
   /// Set current screen (for manual screen tracking)
   Future<void> setCurrentScreen(String screenName, String screenClass) async {
-    await _analytics.setCurrentScreen(
+    await _analytics.logScreenView(
       screenName: screenName,
-      screenClassOverride: screenClass,
+      screenClass: screenClass,
     );
   }
 }

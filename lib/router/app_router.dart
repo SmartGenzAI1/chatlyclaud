@@ -33,8 +33,8 @@ class AppRouter {
   static const String premium = '/premium';
   
   /// Generate routes
-  static Route<dynamic> generateRoute(RouteSettings settings) {
-    switch (settings.name) {
+  static Route<dynamic> generateRoute(RouteSettings routeSettings) {
+    switch (routeSettings.name) {
       case splash:
         return MaterialPageRoute(builder: (_) => const SplashScreen());
       
@@ -57,7 +57,7 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       
       case chat:
-        final args = settings.arguments as Map<String, dynamic>?;
+        final args = routeSettings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
           builder: (_) => ChatScreen(
             chatId: args?['chatId'] ?? '',
@@ -82,7 +82,7 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => Scaffold(
             body: Center(
-              child: Text('Route ${settings.name} not found'),
+              child: Text('Route ${routeSettings.name} not found'),
             ),
           ),
         );

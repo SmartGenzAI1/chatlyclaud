@@ -5,12 +5,20 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../data/models/user_model.dart';
 import '../core/errors/error_handler.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  AuthService() {
+    if (kIsWeb) {
+      // Explicitly set LOCAL persistence on web so sessions survive refresh
+      _auth.setPersistence(Persistence.LOCAL);
+    }
+  }
   
   /// Get current user stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -45,8 +53,8 @@ class AuthService {
         password: password,
       );
       
-      // Send email verification
-      await credential.user?.sendEmailVerification();
+      // Send email verification (non-blocking — don't fail signup if this fails)
+      credential.user?.sendEmailVerification().catchError((_) {});
       
       return credential;
     } catch (e, stackTrace) {
@@ -116,17 +124,33 @@ class AuthService {
   Future<UserModel?> getUserData(String uid) async {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
-      
-      if (doc.exists) {
-        return UserModel.fromFirestore(doc);
-      }
+      if (doc.exists) return UserModel.fromFirestore(doc);
       return null;
     } catch (e, stackTrace) {
       await ErrorHandler.logError(e, stackTrace, context: 'getUserData');
       return null;
     }
   }
-  
+
+  /// Look up a user by username
+  Future<UserModel?> getUserByUsername(String username) async {
+    try {
+      final query = await _firestore
+          .collection('users')
+          .where('username', isEqualTo: username.toLowerCase())
+          .limit(1)
+          .get();
+      if (query.docs.isNotEmpty) {
+        return UserModel.fromFirestore(query.docs.first);
+      }
+      return null;
+    } catch (e, stackTrace) {
+      await ErrorHandler.logError(e, stackTrace, context: 'getUserByUsername');
+      return null;
+    }
+  }
+
+
   /// Update last seen
   Future<void> updateLastSeen(String uid) async {
     try {
@@ -148,6 +172,18 @@ class AuthService {
     }
   }
   
+  /// Update user settings in Firestore
+  Future<void> updateUserSettings(String uid, UserSettings settings) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'settings': settings.toMap(),
+      });
+    } catch (e, stackTrace) {
+      await ErrorHandler.logError(e, stackTrace, context: 'updateUserSettings');
+      rethrow;
+    }
+  }
+
   /// Sign out
   Future<void> signOut() async {
     try {

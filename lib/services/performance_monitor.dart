@@ -20,15 +20,12 @@ class PerformanceMonitor {
   /// Start timing a specific operation
   void startTimer(String operationName) {
     if (_timers.containsKey(operationName)) {
-      _timers[operationName]!.setPresetHoursMilliSeconds(0);
-      _timers[operationName]!.setPresetMinutesMilliSeconds(0);
-      _timers[operationName]!.setPresetSecondsMilliSeconds(0);
-      _timers[operationName]!.setPresetMilliSeconds(0);
-      _timers[operationName]!.tick();
+      _timers[operationName]!.onResetTimer();
+      _timers[operationName]!.onStartTimer();
     } else {
       final timer = StopWatchTimer(mode: StopWatchMode.countUp);
       _timers[operationName] = timer;
-      timer.onExecute.add(StopWatchExecute.start);
+      timer.onStartTimer();
     }
   }
 
@@ -36,13 +33,13 @@ class PerformanceMonitor {
   Future<void> stopTimer(String operationName) async {
     final timer = _timers[operationName];
     if (timer != null) {
-      timer.onExecute.add(StopWatchExecute.stop);
+      timer.onStopTimer();
       await Future.delayed(const Duration(milliseconds: 100)); // Allow timer to stop
       
       final duration = timer.rawTime.value;
       await recordTiming(operationName, duration);
       
-      timer.onExecute.add(StopWatchExecute.reset);
+      timer.onResetTimer();
       _timers.remove(operationName);
     }
   }

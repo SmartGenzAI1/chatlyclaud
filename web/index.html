@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- Security Headers -->
+  <!-- Security Headers (note: X-Frame-Options only works as an HTTP header, not meta) -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="X-XSS-Protection" content="1; mode=block">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   
@@ -233,7 +232,7 @@
       }
     });
     
-    // Security monitoring
+    // Security monitoring — right-click and selection guards
     (function() {
       // Prevent right-click context menu
       document.addEventListener('contextmenu', (e) => {
@@ -246,25 +245,8 @@
           e.preventDefault();
         }
       });
-      
-      // Monitor for potential XSS attempts
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'childList') {
-            mutation.addedNodes.forEach((node) => {
-              if (node.nodeType === Node.ELEMENT_NODE) {
-                const html = node.outerHTML || '';
-                if (html.includes('<script') || html.includes('javascript:')) {
-                  console.warn('Potential XSS attempt detected:', html);
-                  node.remove();
-                }
-              }
-            });
-          }
-        });
-      });
-      
-      observer.observe(document.body, { childList: true, subtree: true });
+      // NOTE: MutationObserver XSS detection removed — it false-positives
+      // on Flutter Web's own script injection and breaks app startup.
     })();
   </script>
 </body>

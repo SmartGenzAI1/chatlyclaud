@@ -19,7 +19,7 @@ class Sanitizers {
     sanitized = sanitized.replaceAll(RegExp(r'data:\s*text/javascript', caseSensitive: false), '');
     
     // Remove potentially harmful characters for SQL injection
-    sanitized = sanitized.replaceAll(RegExp(r'[\'";\\]'), '');
+    sanitized = sanitized.replaceAll(RegExp(r'''['";\\]'''), '');
     
     // Remove potentially harmful characters for XSS
     sanitized = sanitized.replaceAll(RegExp(r'[<>{}[\]]'), '');
@@ -141,7 +141,7 @@ class Sanitizers {
   /// Sanitize email (Additional security)
   static String sanitizeEmail(String email) {
     // Remove potentially harmful characters
-    String sanitized = email.replaceAll(RegExp(r'[<>"\';\\]'), '');
+    String sanitized = email.replaceAll(RegExp(r'''[<>"';\\]'''), '');
     
     // Convert to lowercase
     sanitized = sanitized.toLowerCase();

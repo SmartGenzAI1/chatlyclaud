@@ -4,6 +4,7 @@
 // ============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,18 +23,20 @@ class ErrorHandler extends StatelessWidget {
     return child;
   }
   
-  /// Log error to Crashlytics
+  /// Log error to Crashlytics (or debugPrint on web)
   static Future<void> logError(
     dynamic error,
     StackTrace? stackTrace, {
     String? context,
   }) async {
     debugPrint('Error in $context: $error');
-    await FirebaseCrashlytics.instance.recordError(
-      error,
-      stackTrace,
-      reason: context,
-    );
+    if (!kIsWeb) {
+      await FirebaseCrashlytics.instance.recordError(
+        error,
+        stackTrace,
+        reason: context,
+      );
+    }
   }
   
   /// Get user-friendly error message
