@@ -1,52 +1,21 @@
-# Bug Hunting and Resolution - Chatly
+# Bug Tracking — Chatly
 
-## 🐛 Errors Found and Fixed
+## Fixed ✅
 
-### Status: IN PROGRESS
-**Total Issues**: 750+ (flutter analyze)
-**Critical Errors**: Extracting...
-**Warnings**: To be addressed after errors
+- [x] `.env` committed to public repo — scrubbed from git history
+- [x] `firebase_options.dart` missing — created template using env vars
+- [x] Encryption not wired in — AES-256-GCM now applied in `chat_service.dart`
+- [x] `dart:io` import breaking web — removed from `security_audit.dart`
+- [x] SQL injection patterns for NoSQL DB — removed from sanitizers
+- [x] 13 dead service files — deleted
+- [x] `pubspec.yaml` unused dependencies — cleaned up
+- [x] Encryption claims in README now match reality
+- [x] Tests rewritten to actually compile and run
 
-### Error Categories Identified
+## Known Issues
 
-#### 1. Missing URI Imports (`uri_does_not_exist`)
-- Encryption service imports
-- Service dependencies
-- Validation utilities
-
-#### 2. Undefined Functions/Classes
-- Remote exception handlers  
-- Service method calls
-
-#### 3. Unterminated Strings
-- String literal issues
-
-### Fix Plan
-
-1. [/] Fix pubspec.yaml dependencies (intl version conflict)
-2. [ ] Fix missing imports in services
-3. [ ] Fix undefined function calls
-4. [ ] Fix syntax errors
-5. [ ] Run flutter analyze again
-6. [ ] Fix remaining warnings
-
-### Progress Tracking
-
-**Phase 1: Dependency Resolution**
-- [x] Fixed intl version to 0.20.2
-- [x] Resolved flutter pub get
-
-**Phase 2: Error Analysis**  
-- [x] Ran flutter analyze
-- [/] Extracting specific errors
-- [ ] Categorizing by priority
-
-**Phase 3: Error Fixes**
-- [ ] Missing imports
-- [ ] Undefined references
-- [ ] Syntax errors
-
-**Phase 4: Verification**
-- [ ] Run flutter analyze
-- [ ] Achieve 0 errors
-- [ ] Document remaining warnings
+- [ ] Google Sign-In not implemented
+- [ ] Payment processing (RevenueCat) not integrated
+- [ ] Group chat needs polish
+- [ ] Push notifications (FCM) not configured
+- [ ] Key exchange protocol needs hardening (currently session keys stored alongside messages)

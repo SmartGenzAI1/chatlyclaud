@@ -1,10 +1,11 @@
 // ============================================================================
 // FILE: lib/features/auth/presentation/screens/login_screen.dart
-// PURPOSE: Premium login screen with branding and eye-toggle
+// PURPOSE: Login screen with email and Google Sign-In
 // ============================================================================
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/widgets/common/custom_button.dart';
 import '../../../../core/widgets/common/custom_textfield.dart';
 import '../../../../core/utils/validators.dart';
@@ -30,9 +31,10 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void initState() {
     super.initState();
-    _fadeController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
-    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
+    _fadeController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 600));
+    _fadeAnimation =
+        CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
     _fadeController.forward();
   }
 
@@ -54,7 +56,6 @@ class _LoginScreenState extends State<LoginScreen>
         opacity: _fadeAnimation,
         child: CustomScrollView(
           slivers: [
-            // Gradient header
             SliverToBoxAdapter(
               child: Container(
                 height: 260,
@@ -84,29 +85,21 @@ class _LoginScreenState extends State<LoginScreen>
                             size: 44, color: Colors.white),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Welcome Back!',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      const Text('Welcome Back!',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
-                      Text(
-                        'Sign in to continue',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.85),
-                          fontSize: 14,
-                        ),
-                      ),
+                      Text('Sign in to continue',
+                          style: TextStyle(
+                              color: Colors.white.withOpacity(0.85),
+                              fontSize: 14)),
                     ],
                   ),
                 ),
               ),
             ),
-
-            // Form
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -116,8 +109,6 @@ class _LoginScreenState extends State<LoginScreen>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const SizedBox(height: 8),
-
-                      // Email
                       CustomTextField(
                         controller: _emailController,
                         label: 'Email',
@@ -125,10 +116,7 @@ class _LoginScreenState extends State<LoginScreen>
                         prefixIcon: const Icon(Icons.email_outlined),
                         validator: Validators.validateEmail,
                       ),
-
                       const SizedBox(height: 16),
-
-                      // Password
                       CustomTextField(
                         controller: _passwordController,
                         label: 'Password',
@@ -138,15 +126,12 @@ class _LoginScreenState extends State<LoginScreen>
                           icon: Icon(_obscurePassword
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined),
-                          onPressed: () => setState(
-                              () => _obscurePassword = !_obscurePassword),
+                          onPressed: () =>
+                              setState(() => _obscurePassword = !_obscurePassword),
                         ),
-                        validator: (v) => (v == null || v.isEmpty)
-                            ? 'Password is required'
-                            : null,
+                        validator: (v) =>
+                            (v == null || v.isEmpty) ? 'Password is required' : null,
                       ),
-
-                      // Forgot
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
@@ -155,13 +140,9 @@ class _LoginScreenState extends State<LoginScreen>
                           child: const Text('Forgot Password?'),
                         ),
                       ),
-
                       const SizedBox(height: 8),
-
-                      // Error
                       if (authProvider.error != null)
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
+                        Container(
                           padding: const EdgeInsets.all(12),
                           margin: const EdgeInsets.only(bottom: 16),
                           decoration: BoxDecoration(
@@ -169,35 +150,25 @@ class _LoginScreenState extends State<LoginScreen>
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: Colors.red.shade200),
                           ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.error_outline,
-                                  color: Colors.red, size: 18),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  authProvider.error!,
-                                  style:
-                                      TextStyle(color: Colors.red.shade800),
-                                ),
-                              ),
-                            ],
-                          ),
+                          child: Row(children: [
+                            const Icon(Icons.error_outline, color: Colors.red, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(authProvider.error!,
+                                  style: TextStyle(color: Colors.red.shade800)),
+                            ),
+                          ]),
                         ),
-
-                      // Login button
                       CustomButton(
                         text: 'Login',
                         onPressed: _handleLogin,
                         isLoading: authProvider.isLoading,
                         width: double.infinity,
                       ),
-
                       const SizedBox(height: 20),
-
-                      // Divider
                       Row(children: [
-                        Expanded(child: Divider(color: colorScheme.outlineVariant)),
+                        Expanded(
+                            child: Divider(color: colorScheme.outlineVariant)),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text('or continue with',
@@ -205,41 +176,19 @@ class _LoginScreenState extends State<LoginScreen>
                                   fontSize: 13,
                                   color: colorScheme.onSurface.withOpacity(0.45))),
                         ),
-                        Expanded(child: Divider(color: colorScheme.outlineVariant)),
+                        Expanded(
+                            child: Divider(color: colorScheme.outlineVariant)),
                       ]),
-
                       const SizedBox(height: 16),
-
-                      // Google Sign-In button
                       SizedBox(
                         width: double.infinity,
                         height: 50,
                         child: OutlinedButton.icon(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text('Google Sign-In coming soon! Use email for now.'),
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            );
-                          },
-                          icon: Container(
-                            width: 22,
-                            height: 22,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Center(
-                              child: Text('G',
-                                  style: TextStyle(
-                                    color: Color(0xFF4285F4),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                  )),
-                            ),
-                          ),
+                          onPressed: authProvider.isLoading
+                              ? null
+                              : () => _handleGoogleSignIn(authProvider),
+                          icon: FaIcon(FontAwesomeIcons.google,
+                              size: 20, color: Colors.red.shade600),
                           label: const Text('Continue with Google'),
                           style: OutlinedButton.styleFrom(
                             shape: RoundedRectangleBorder(
@@ -248,10 +197,7 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 20),
-
-                      // Sign up link
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -265,10 +211,7 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 12),
-
-                      // ToS note
                       Text(
                         'By continuing, you agree to our Terms of Service and Privacy Policy.',
                         style: TextStyle(
@@ -291,12 +234,18 @@ class _LoginScreenState extends State<LoginScreen>
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
-    final authProvider =
-        Provider.of<AuthProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final success = await authProvider.signIn(
       _emailController.text.trim(),
       _passwordController.text,
     );
+    if (success && mounted) {
+      AppRouter.navigateAndRemoveUntil(context, AppRouter.home);
+    }
+  }
+
+  Future<void> _handleGoogleSignIn(AuthProvider authProvider) async {
+    final success = await authProvider.signInWithGoogle();
     if (success && mounted) {
       AppRouter.navigateAndRemoveUntil(context, AppRouter.home);
     }

@@ -325,7 +325,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 Text(
-                  msg.text,
+                  chatProvider.decryptMessage(msg, widget.chatId),
                   style: TextStyle(
                     color: isMe
                         ? Colors.white

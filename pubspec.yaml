@@ -1,5 +1,5 @@
 name: chatly
-description: Smart, Private & Anonymous Chat App - Privacy-first messaging with AI-powered features
+description: Private, encrypted messaging app with Signal Protocol & Firebase
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -9,81 +9,64 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
+
   # State Management
   provider: ^6.1.1
-  
+
   # Firebase
-  firebase_core: ^4.4.0
-  firebase_auth: ^6.1.4
-  firebase_messaging: ^16.1.1
-  firebase_analytics: ^12.1.2
-  firebase_crashlytics: ^5.0.7
-  firebase_storage: ^13.0.6
-  cloud_functions: ^6.0.6
-  cloud_firestore: ^6.1.2
-  
-  # Security & Encryption
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.16.0
+  firebase_messaging: ^14.7.10
+  firebase_analytics: ^10.8.0
+  firebase_crashlytics: ^3.4.9
+  firebase_storage: ^11.6.0
+  cloud_firestore: ^4.14.0
+
+  # Google Sign-In
+  google_sign_in: ^6.1.6
+
+  # Encryption
   encrypt: ^5.0.3
   pointycastle: ^3.7.3
   crypto: ^3.0.3
-  flutter_secure_storage: ^10.0.0
-  local_auth: ^3.0.1
-  cryptography: ^2.5.0
-  
+  flutter_secure_storage: ^9.0.0
+
   # UI
-  google_fonts: ^8.0.2
+  google_fonts: ^6.1.0
+  font_awesome_flutter: ^10.6.0
   shimmer: ^3.0.0
   lottie: ^3.0.0
   cached_network_image: ^3.3.1
-  
+
   # Utilities
-  intl: 0.20.2  # Required by flutter_localizations
-  flutter_dotenv: ^6.0.0
+  intl: ^0.19.0
+  flutter_dotenv: ^5.1.0
   http: ^1.2.0
-  dio: ^5.4.0
-  sqflite: ^2.3.2
   path: ^1.8.3
   path_provider: ^2.1.2
-  permission_handler: ^12.0.1
   shared_preferences: ^2.2.2
   url_launcher: ^6.2.4
-  connectivity_plus: ^7.0.0
-  device_info_plus: ^12.3.0
-  qr_flutter: ^4.1.0
-  qr_code_scanner: ^1.0.1
-  
-  # Payments & Subscriptions
-  in_app_purchase: ^3.1.11
-  
+  connectivity_plus: ^5.0.2
+  device_info_plus: ^9.1.2
+
   # Image Handling
   image_picker: ^1.0.7
-  image_picker_for_web: ^3.0.2
-  image: ^4.1.3
-  
-  # Audio Recording
-  record: ^6.2.0
-  audio_waveforms: ^2.0.2
-  just_audio: ^0.10.5
-  
+
+  # Payments
+  in_app_purchase: ^3.1.11
+
   # Web Support
   universal_html: ^2.2.4
   js: ^0.6.7
-  
-  # Supabase (Optional)
-  supabase: ^2.0.4
-  
+
   # Localization
   flutter_localizations:
     sdk: flutter
-  flutter_local_notifications: ^20.1.0
-  firebase_performance: ^0.11.1+4
-  stop_watch_timer: ^3.2.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
+  flutter_lints: ^3.0.0
   build_runner: ^2.4.7
   mockito: ^5.4.4
 
