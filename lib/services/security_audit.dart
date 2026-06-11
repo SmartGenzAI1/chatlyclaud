@@ -43,7 +43,7 @@ class SecurityAuditService {
         'platform': kIsWeb ? 'web' : 'mobile',
       });
     } catch (e) {
-      if (kDebugMode) print('Security audit log failed: $e');
+      if (kDebugMode) debugPrint('Security audit log failed: $e');
     }
   }
 

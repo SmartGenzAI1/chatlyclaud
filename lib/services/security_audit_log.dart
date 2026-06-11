@@ -3,156 +3,114 @@
 // PURPOSE: Security audit logging for tracking security events
 // ============================================================================
 
-import 'dart:convert';
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Security event severity levels
-enum SecurityLevel {
-  info,
-  warning,
-  critical,
-}
+enum SecurityLevel { info, warning, critical }
 
-/// Security audit logging service
-/// 
-/// Tracks security-related events for:
-/// - Debugging security issues
-/// - Detecting attacks
-/// - Compliance requirements
-/// - Incident response
 class SecurityAuditLog {
   static final SecurityAuditLog _instance = SecurityAuditLog._internal();
-  
-  late final FlutterSecureStorage _storage;
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   static const String _logKey = 'security_audit_log';
-  static const int _maxLogEntries = 1000;
-  
+  static const int _maxLogEntries = 500;
+  final List<Map<String, dynamic>> _buffer = [];
+
   factory SecurityAuditLog() => _instance;
-  
-  SecurityAuditLog._internal() {
-    _storage = const FlutterSecureStorage();
-  }
-  
+  SecurityAuditLog._internal();
+
   /// Log a security event
   static Future<void> logEvent({
     required String event,
     required String details,
-    SecurityLevel level = SecurityLevel.info,
-    Map<String, dynamic>? metadata,
+    required SecurityLevel level,
   }) async {
-    try {
-      final entry = {
-        'timestamp': DateTime.now().toIso8601String(),
-        'event': event,
-        'details': details,
-        'level': level.name,
-        if (metadata != null) 'metadata': metadata,
-      };
-      
-      await _instance._appendToLog(entry);
-      
-      // Alert on critical events
-      if (level == SecurityLevel.critical) {
-        await _instance._handleCriticalEvent(entry);
-      }
-    } catch (e) {
-      // Never throw from logging - fail silently
-      print('Failed to log security event: $e');
+    final entry = {
+      'event': event,
+      'details': details,
+      'level': level.name,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+    
+    _instance._buffer.add(entry);
+    
+    if (_instance._buffer.length >= 50) {
+      await _instance._flush();
+    }
+    
+    if (kDebugMode && level == SecurityLevel.critical) {
+      debugPrint('SECURITY CRITICAL: $event - $details');
     }
   }
-  
-  /// Append entry to secure log
-  Future<void> _appendToLog(Map<String, dynamic> entry) async {
-    try {
-      final existingLog = await _storage.read(key: _logKey);
-      List<Map<String, dynamic>> logs = [];
-      
-      if (existingLog != null) {
-        final decoded = jsonDecode(existingLog) as List<dynamic>;
-        logs = decoded.map((e) => e as Map<String, dynamic>).toList();
-      }
-      
-      logs.add(entry);
-      
-      // Trim old entries to prevent unbounded growth
-      if (logs.length > _maxLogEntries) {
-        logs = logs.sublist(logs.length - _maxLogEntries);
-      }
-      
-      await _storage.write(key: _logKey, value: jsonEncode(logs));
-    } catch (e) {
-      print('Failed to append to log: $e');
-    }
-  }
-  
-  /// Handle critical security events
-  Future<void> _handleCriticalEvent(Map<String, dynamic> entry) async {
-    // TODO: Implement alerting mechanism
-    // - Send push notification
-    // - Log to remote server
-    // - Trigger security protocol
-    print('CRITICAL SECURITY EVENT: ${entry['event']}');
-  }
-  
+
   /// Get recent security events
-  static Future<List<Map<String, dynamic>>> getRecentEvents({
-    int limit = 50,
-    SecurityLevel? filterLevel,
-  }) async {
+  static Future<List<Map<String, dynamic>>> getRecentEvents({int limit = 50}) async {
     try {
-      final existingLog = await _instance._storage.read(key: _logKey);
-      if (existingLog == null) return [];
+      final raw = await _instance._secureStorage.read(key: _logKey);
+      if (raw == null) return [];
       
-      final decoded = jsonDecode(existingLog) as List<dynamic>;
-      var logs = decoded.map((e) => e as Map<String, dynamic>).toList();
+      final events = List<Map<String, dynamic>>.from(
+        (raw.split('|||').map((e) {
+          try {
+            return Map<String, dynamic>.from(
+              e.split('|').fold<Map<String, dynamic>>({}, (map, pair) {
+                final parts = pair.split(':');
+                if (parts.length == 2) map[parts[0]] = parts[1];
+                return map;
+              }),
+            );
+          } catch (_) {
+            return <String, dynamic>{};
+          }
+        }))
+      );
       
-      // Filter by level if specified
-      if (filterLevel != null) {
-        logs = logs.where((log) => log['level'] == filterLevel.name).toList();
-      }
-      
-      // Return most recent entries
-      return logs.reversed.take(limit).toList();
+      return events.take(limit).toList();
     } catch (e) {
+      if (kDebugMode) debugPrint('SecurityAuditLog: failed to read log: $e');
       return [];
     }
   }
-  
-  /// Clear audit log (admin only)
-  static Future<void> clearLog() async {
+
+  /// Clear the audit log
+  static Future<void> clear() async {
     try {
-      await _instance._storage.delete(key: _logKey);
-      
-      await logEvent(
-        event: 'audit_log_cleared',
-        details: 'Security audit log was cleared',
-        level: SecurityLevel.warning,
-      );
+      await _instance._secureStorage.delete(key: _logKey);
+      _instance._buffer.clear();
     } catch (e) {
-      print('Failed to clear log: $e');
+      if (kDebugMode) debugPrint('SecurityAuditLog: failed to clear: $e');
     }
   }
-  
-  /// Get log statistics
-  static Future<Map<String, int>> getLogStats() async {
+
+  Future<void> _flush() async {
     try {
-      final events = await getRecentEvents(limit: _maxLogEntries);
+      final existing = await _secureStorage.read(key: _logKey) ?? '';
+      final allEntries = [..._buffer, ..._formatExisting(existing)];
+      final trimmed = allEntries.take(_maxLogEntries).toList();
       
-      final stats = {
-        'total': events.length,
-        'info': 0,
-        'warning': 0,
-        'critical': 0,
-      };
+      final serialized = trimmed.map((e) => 
+        e.entries.map((kv) => '${kv.key}:${kv.value}').join('|')
+      ).join('|||');
       
-      for (final event in events) {
-        final level = event['level'] as String;
-        stats[level] = (stats[level] ?? 0) + 1;
-      }
-      
-      return stats;
+      await _secureStorage.write(key: _logKey, value: serialized);
+      _buffer.clear();
     } catch (e) {
-      return {'total': 0, 'info': 0, 'warning': 0, 'critical': 0};
+      if (kDebugMode) debugPrint('SecurityAuditLog: flush failed: $e');
+    }
+  }
+
+  List<Map<String, dynamic>> _formatExisting(String existing) {
+    if (existing.isEmpty) return [];
+    try {
+      return existing.split('|||').map((e) {
+        final map = <String, dynamic>{};
+        for (final pair in e.split('|')) {
+          final parts = pair.split(':');
+          if (parts.length == 2) map[parts[0]] = parts[1];
+        }
+        return map;
+      }).toList();
+    } catch (_) {
+      return [];
     }
   }
 }

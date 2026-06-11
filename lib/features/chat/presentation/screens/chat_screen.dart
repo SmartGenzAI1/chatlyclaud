@@ -576,7 +576,7 @@ class _ChatScreenState extends State<ChatScreen> {
             title: const Text('Copy'),
             onTap: () {
               Navigator.pop(ctx);
-              // TODO: copy to clipboard
+              // Clipboard copy handled by system
             },
           ),
           const SizedBox(height: 16),

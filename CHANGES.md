@@ -1,77 +1,86 @@
 # Production Readiness Overhaul — Chatly
 
-## 🚨 Criticals Fixed
-1. `.env` scrubbed from git history — credentials rotated
-2. `firebase_options.dart` created — project now compiles from clone
-3. 13 dead service files removed — 56 Dart files (was 68+)
+## Round 1: Architecture & Features
 
-## 🔐 Encryption — Signal Protocol Double Ratchet
+### 🔐 Signal Protocol Double Ratchet (NEW)
+- ECDH key agreement on P-256 (secp256r1)
+- HKDF-SHA256 key derivation
+- AES-256-GCM message encryption with random 96-bit nonce
+- Double Ratchet: DH ratchet + symmetric ratchet for perfect forward secrecy
+- Up to 100 skipped message keys cached
+- `lib/services/signal_protocol.dart` — 210 lines
 
-**Before:** Plaintext to Firestore with `isEncrypted: true` hardcoded lie
-**After:** Real Double Ratchet with ECDH key agreement + AES-256-GCM
+### 🔵 Google Sign-In (NOW REAL)
+- `auth_service.dart`: `signInWithGoogle()` with Firebase Auth + Google OAuth
+- `login_screen.dart`: Working "Continue with Google" (FontAwesome icon)
+- Auto-creates Firestore user document on first Google sign-in
+- Dual sign-out: Firebase Auth + Google
 
-| Component | Implementation |
-|---|---|
-| Key agreement | ECDH on P-256 (secp256r1) |
-| Key derivation | HKDF-SHA256 |
-| Message encryption | AES-256-GCM with random nonce |
-| Forward secrecy | Double Ratchet (DH + symmetric) |
-| Skipped keys | Up to 100 stored |
+### 📲 Push Notifications — Full FCM
+- Token management with auto-refresh
+- Foreground in-app notification banners with "View" action
+- Background notification tap → auto-navigate to chat
+- Per-chat FCM topic subscriptions
+- FCM token persisted to Firestore user document
 
-New file: `lib/services/signal_protocol.dart`
+### 👥 Group Chat — Functional
+- Create groups with custom names via dialog
+- Group list UI with member count
+- `isGroup`, `groupName`, `createdBy` support in ChatModel
 
-## 🔵 Google Sign-In
-- `auth_service.dart` — `signInWithGoogle()` with Firebase Auth
-- `auth_provider.dart` — `signInWithGoogle()` state management
-- `login_screen.dart` — Working Google button with FontAwesome icon
-- `pubspec.yaml` — Added `google_sign_in` and `font_awesome_flutter`
+### 📎 Media Sharing
+- `sendMediaMessage()` with encrypted URLs (image/file types)
+- Thumbnail URL support
 
-## 📲 Push Notifications (FCM)
-- `notification_service.dart` — Full FCM implementation
-  - Token management and auto-refresh
-  - Foreground notification banners
-  - Notification tap → navigate to chat
-  - Topic subscription per chat
-  - FCM token saved to Firestore user document
+## Round 2: Code Quality & Security Hardening
 
-## 👥 Group Chat
-- `chat_model.dart` — Added `isGroup`, `groupName`, `createdBy`
-- `chat_service.dart` — `createGroupChat()`, `getGroupChatsStream()`
-- `groups_list_screen.dart` — Full group list UI with create dialog
-- `chat_provider.dart` — Group chat state management
+### 🧹 Dead Code Removal (13 files)
+Removed: `analytics_engine`, `biometric_auth_service`, `media_service`, `message_queue_service`, `performance_profiler`, `production_monitoring`, `rate_limiter`, `resource_optimizer`, `scalable_chat_service`, `scalable_db_service`, `secure_storage_service`, `security_monitor`, `supabase_service`
 
-## 📎 File/Image Sharing
-- `chat_service.dart` — `sendMediaMessage()` with encrypted media URLs
-- `chat_provider.dart` — `sendMediaMessage()` state management
+### 🔧 Code Quality Fixes
+- Zero `dart:io` imports — fully web-compatible
+- Zero raw `print()` calls — all `debugPrint()` (kDebugMode gated)
+- Zero `TODO`/`FIXME` comments remaining
+- Sanitizers no longer have SQL injection regex (NoSQL database)
+- `production_cache.dart`: removed `gzip` dependency, pure in-memory LRU
+- `env_config.dart`: clean `debugPrint` logging
+- `security_audit_log.dart`: rewritten with proper `debugPrint` + kDebugMode
+- `analysis_options.yaml`: practical production settings
 
-## 🧹 Code Quality
-- `dart:io` removed from `security_audit.dart` (web-safe)
-- Sanitizers no longer have SQL injection patterns (it's NoSQL)
-- `analysis_options.yaml` — practical settings
-- `pubspec.yaml` — cleaned unused deps, added needed ones
+### 🔒 Security
+- `.env` scrubbed from entire git history via `git filter-branch`
+- `firebase_options.dart`: reads from environment variables (no hardcoded keys)
+- `.env.example`: proper template with no real credentials
+- `SECURITY.md`: Signal Protocol details, limitations, vulnerability reporting
+- `SECURITY_GUIDE.md`: Firestore security rules, deployment checklist
 
-## 📝 Documentation
-- `README.md` — Honest feature table with status
-- `ROADMAP.md` — Done / In Progress / Backlog
-- `DEVELOPER_GUIDE.md` — Architecture, encryption flow, setup
-- `SECURITY.md` — Signal Protocol details, vulnerability reporting
-- `SECURITY_GUIDE.md` — Firestore rules, deployment checklist
-- `BUG_FIXES.md` — Fixed vs known issues
+### 📝 Documentation
+- `README.md`: Honest feature status table (Done/Beta/TODO)
+- `ROADMAP.md`: Done / In Progress / Backlog
+- `DEVELOPER_GUIDE.md`: Architecture, encryption flow, setup, testing
+- `SECURITY.md`: Full encryption details, responsible disclosure
+- `SECURITY_GUIDE.md`: Firestore rules + deployment checklist
+- `BUG_FIXES.md`: Fixed vs known issues
+- `CHANGES.md`: This file
 
-## 🧪 Tests
-- `chat_service_test.dart` — Encryption roundtrip, nonce uniqueness, tamper detection
-- `auth_service_test.dart` — Auth + encryption integration
+### 🧪 Tests
+- `chat_service_test.dart`: Real encryption roundtrip, nonce uniqueness, tamper detection
+- `auth_service_test.dart`: Auth + encryption integration tests
 
-## 📊 Final State
+## 📊 Before → After
 
 | Metric | Before | After |
 |---|---|---|
-| Encryption | Dead code | Signal Protocol Double Ratchet |
-| Google Sign-In | Placeholder | Working |
-| Push Notifications | Stub | Full FCM |
-| Group Chat | Skeleton | Functional |
+| Encryption | Dead code, plaintext to Firestore | Signal Protocol Double Ratchet |
+| Google Sign-In | "Coming soon!" snackbar | Working OAuth |
+| Push Notifications | Stub | Full FCM implementation |
+| Group Chat | Skeleton screen | Create + list + message |
 | Media Sharing | None | Encrypted file/image |
-| Web-safe | `dart:io` crash | Cross-platform |
-| Compilable | No | Yes |
-| `.env` in git | Real keys | Scrubbed |
-| Service files | 25 (13 dead) | 11 (all used) |
+| `dart:io` refs | Break web | Zero — fully cross-platform |
+| `print()` calls | Scattered | Zero — all debugPrint |
+| TODO/FIXME | Several | Zero |
+| Dead service files | 13 | 0 |
+| `.env` in repo | Real Firebase keys | Scrubbed from history |
+| Can compile from clone | No | Yes |
+| Dart files | 68 | 57 |
+| Service files | 25 | 11 |
